@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>베를린 보물찾기</title>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyD0pC0tEpkDWnp34v7Xmj3DZnVzomGJPEQ",
+  authDomain: "berlin-683dd.firebaseapp.com",
+  projectId: "berlin-683dd",
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+</script>
+</head>
+
+<body style="text-align:center; font-family:sans-serif;">
+
+<h1>🎮 주찬양 런닝맨 (베를린 보물찾기)</h1>
+<h3 id="myTeam"></h3>
+
+<div id="gameArea"></div>
+
+<script>
+
+// 이름 가져오기
+const params = new URLSearchParams(window.location.search);
+const name = params.get("name");
+
+let myTeam = null;
+
+// 팀 찾기
+async function getTeam() {
+  let doc = await db.collection("game").doc("teams").get();
+  let data = doc.data();
+
+  for (let t in data) {
+    if (data[t].members.includes(name)) return t;
+  }
+  return null;
+}
+
+// 시작
+async function init() {
+  myTeam = await getTeam();
+
+  document.getElementById("myTeam").innerText =
+    name + " (" + myTeam + "팀)";
+
+  listenGame();
+}
+
+// 🔥 팀별 step 감지
+function listenGame() {
+  db.collection("game").doc("teams").onSnapshot((doc) => {
+
+    let data = doc.data();
+    let step = data[myTeam].step;
+
+    showStep(step);
+  });
+}
+
+// 🔥 화면 출력
+function showStep(step) {
+
+  let area = document.getElementById("gameArea");
+
+  // 1번 문제
+  if (step === 0) {
+    area.innerHTML = `
+      <p>성경을 이해하면 미션 장소에 도착 할 수 있을 것이다.<br>
+      그럼 주찬양에서 야구를 아주 잘 하는 사람을 찾을 수 있을 것이다.</p>
+
+      <b>문제:</b><br><br>
+      출애굽기, 신명기, 욥기, 열왕기하, 사무엘상, 역대하<br>
+      민수기, 에스라, 역대상<br><br>
+
+      <input id="answer">
+      <button onclick="submit(0)">제출</button>
+    `;
+  }
+  // 🔥 1번 → 장소 + 비밀번호
+  if (step === 0.5) {
+    area.innerHTML = `
+      <h2>📍 Berlin Dom, Am Lustgarten, 10178 Berlin </h2>
+      <p>이곳으로 이동하세요.<br>
+        주찬양에서 야구를 아주 잘 하는 사람을 찾을 수 있을 것이다.</p>
+
+      <input id="pw" placeholder="진행자 비밀번호">
+      <button onclick="unlock(1)">다음으로</button>
+    `;
+  }
+
+  // 2번 문제
+  if (step === 1) {
+    area.innerHTML = `
+      <p>너희는 말씀을 통해 길을 찾으라.<br></p>
+      그럼 주찬양에서 악기를 다 잘다루는 사람을 찾을 수 있을 것이다.</p>
+
+      <b>문제:</b><br><br>
+
+      (그런즉 하나님이 영영히 너를 멸하심이여 너를 취하여 네 장막에서 뽑아내며 생존하는 땅에서 네 뿌리를 빼시리로다.)<br>
+      (이는 내가 꺼리지 않고 하나님의 뜻을 다 너희에게 전하였음이라.)
+      <br><br>
+
+      (그런즉 가라지를 거두어 불에 사르는것 같이 세상끝에도 그러하리라.)<br>
+      (우리가 하나님을 의지하고 용감히 행하리니 저는 우리의 대적을 밟으실 자심이로다)<br><br>
+
+      <input id="lat" placeholder="">
+      <input id="lng" placeholder="">
+      <button onclick="submit(1)">제출</button>
+    `;
+  }
+
+
+  // 🔥 2번 → 장소 + 비밀번호
+  if (step === 1.5) {
+    area.innerHTML = `
+      <h2>📍 52.52027, 13.406012</h2>
+      <p>이곳으로 이동하면 주찬양의 JYP를 찾을 수 있을 것이다.</p></p>
+
+      <input id="pw" placeholder="진행자 비밀번호">
+      <button onclick="unlock(2)">다음으로</button>
+    `;
+  }
+
+  // 3번 문제
+  if (step === 2) {
+    area.innerHTML = `
+      <h2>🔍 마지막 단서</h2>
+
+      <p>
+        <span style="font-size:60px; letter-spacing:10px;">
+          🏛️ 🌊 ➰ 🌿
+        </span><br><br>
+      </p>
+
+      <input id="answer" placeholder="정답 입력">
+      <button onclick="submit(2)">제출</button>
+    `;
+  }
+
+  // 완료
+  if (step === 3) {
+    area.innerHTML = `
+      <h2>Spreebogenpark 10557 Berlin</h2>
+      <p>주찬양에서 잘생긴 사람 찾아 마지막 미션을 준비하십시오.</p>
+    `;
+  }
+}
+
+// 🔥 정답 처리
+async function submit(currentStep) {
+
+  let correct = false;
+
+  // 1번
+  if (currentStep === 0) {
+    let a = document.getElementById("answer").value.toLowerCase();
+    if (a.includes("berlin dom") || a.includes("berlindom")) {
+      correct = true;
+    }
+  }
+
+  // 2번
+  if (currentStep === 1) {
+    let lat = document.getElementById("lat").value;
+    let lng = document.getElementById("lng").value;
+
+    if (
+      lat.includes("52.52027") &&
+      lng.includes("13.406012")
+    ) {
+      correct = true;
+    }
+  }
+
+  // 3번
+  if (currentStep === 2) {
+    let answer = document.getElementById("answer").value.toLowerCase();
+    if (answer.includes("spree")) {
+      correct = true;
+    }
+  }
+
+  if (!correct) {
+    alert("❌ 다시 시도!");
+    return;
+  }
+
+  const ref = db.collection("game").doc("teams");
+
+  await db.runTransaction(async (t) => {
+
+    let doc = await t.get(ref);
+    let data = doc.data();
+
+    // 문제 → 중간단계
+    if (data[myTeam].step === currentStep) {
+      data[myTeam].step = currentStep + 0.5;
+      t.set(ref, data);
+    }
+  });
+}
+
+// 🔥 비밀번호 처리
+async function unlock(nextStep) {
+
+  let pw = document.getElementById("pw").value;
+
+  if (pw !== "123123") {
+    alert("❌ 비밀번호 틀림");
+    return;
+  }
+
+  const ref = db.collection("game").doc("teams");
+
+  await db.runTransaction(async (t) => {
+
+    let doc = await t.get(ref);
+    let data = doc.data();
+
+    data[myTeam].step = nextStep;
+
+    t.set(ref, data);
+  });
+}
+
+init();
+
+</script>
+
+</body>
+</html>
