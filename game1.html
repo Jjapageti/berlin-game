@@ -129,15 +129,18 @@ function showStep(step) {
     `;
   }
 
+
   // 3번 문제
   if (step === 2) {
     area.innerHTML = `
-      <h2>🔍 다음 이모티콘을 해석하여 미션 장소를 찾으세요</h2>
+      <h2>🔍 마지막 단서를 해독하라</h2>
 
       <p>
         <span style="font-size:60px; letter-spacing:10px;">
-          🏛️ 🌊 ➰ 🌿
+            🏛️ 🌊 ➰ 🌿
         </span><br><br>
+        이 네 가지를 모두 만족하는 곳에서<br>
+        주찬양에서 잘생긴 사람이 너희를 기다리고 있을 것이다.
       </p>
 
       <input id="answer" placeholder="정답 입력">
@@ -148,8 +151,8 @@ function showStep(step) {
   // 완료
   if (step === 3) {
     area.innerHTML = `
-      <h2>Spreebogenpark 10557 Berlin</h2>
-      <p>이 장소를 이동하여, 주찬양에서 잘생긴 사람 찾아 마지막 미션을 준비하십시오.</p>
+      <h2>Spreebogenpark10557 Berlin</h2>
+      <p>주찬양에서 잘생긴 사람 찾아 마지막 미션을 준비하십시오.</p>
     `;
   }
 }
