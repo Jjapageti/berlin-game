@@ -35,7 +35,7 @@ const db = firebase.firestore();
 
 <script>
 
-const limits = { A:4, B:4, C:4 };
+const limits = { A:3, B:4, C:4 };
 
 // 🔥 실시간 팀 상태 표시
 db.collection("game").doc("teams").onSnapshot((doc) => {
@@ -43,7 +43,7 @@ db.collection("game").doc("teams").onSnapshot((doc) => {
   let teams = doc.data();
 
   document.getElementById("teamsView").innerText =
-    "A팀 (" + teams.A.members.length + "/4): " + teams.A.members.join(", ") + "\n\n" +
+    "A팀 (" + teams.A.members.length + "/3): " + teams.A.members.join(", ") + "\n\n" +
     "B팀 (" + teams.B.members.length + "/4): " + teams.B.members.join(", ") + "\n\n" +
     "C팀 (" + teams.C.members.length + "/4): " + teams.C.members.join(", ");
 });
